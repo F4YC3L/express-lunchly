@@ -45,6 +45,27 @@ router.post("/add/", async function(req, res, next) {
     return next(err);
   }
 });
+/** handle a search for customers by name */
+router.get('/search', async function(req, res, next){
+  try{
+    const terms = req.query.terms;
+    const customers = await Customer.searchForCustomer(terms);
+
+    return res.render('customer_search_results.html', { customers });
+  }catch(err){
+    return next(err);
+  }
+});
+
+/** finds top 10 customers ordered by most reservations */
+router.get('/best-customers', async function(req,res,next){
+  try{
+    const customers = await Customer.getTopTenBestCustomers();
+    return res.render("best_list.html", { customers });
+  } catch(err){
+    return next(err);
+  }
+});
 
 /** Show a customer, given their ID. */
 
@@ -88,6 +109,7 @@ router.post("/:id/edit/", async function(req, res, next) {
     return next(err);
   }
 });
+
 
 /** Handle adding a new reservation. */
 

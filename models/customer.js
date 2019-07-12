@@ -52,7 +52,51 @@ class Customer {
 
     return new Customer(customer);
   }
+  /** return full name of customer */
+   fullName(){
+     return `${this.firstName} ${this.lastName}`
+   }
 
+  /** get all matching customers based on search term */
+
+  static async searchForCustomer(terms) {
+    let response = await db.query(
+      `SELECT id, 
+          first_name AS "firstName",  
+          last_name AS "lastName",
+          phone, 
+          notes 
+        FROM customers WHERE (first_name LIKE $1
+          OR last_name LIKE $1
+          OR CONCAT(first_name, ' ', last_name) LIKE $1
+          OR CONCAT(last_name, ' ', first_name) LIKE $1)` ,
+      [`%${terms}%`]
+    );
+    
+    if (response.rowCount === 0) {
+      throw new Error("No results")
+    }
+
+    return response.rows.map(c => new Customer(c));
+  }
+
+  static async getTopTenBestCustomers(){
+    let response = await db.query(
+      `SELECT c.id, 
+      c.first_name AS "firstName",  
+      c.last_name AS "lastName",
+      c.phone, 
+      c.notes
+      FROM customers c
+      LEFT JOIN reservations r
+      ON c.id = r.customer_id
+      GROUP BY c.id
+      ORDER BY COUNT(r.id) DESC
+      LIMIT 10`
+    );
+    console.log(response.rows)
+  return response.rows.map(c => new Customer(c))
+  }
   /** get all reservations for this customer. */
 
   async getReservations() {
@@ -81,3 +125,5 @@ class Customer {
 }
 
 module.exports = Customer;
+
+
