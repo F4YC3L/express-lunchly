@@ -15,6 +15,52 @@ class Reservation {
     this.startAt = startAt;
     this.notes = notes;
   }
+  /** validate notes */
+  get notes(){
+    return this._notes;
+  }
+  set notes(val){
+    if (!val){
+      this._notes = "";
+    }
+    else {
+      this._notes = val;
+    }
+  }
+/** validate number of guests */
+  get numGuests(){
+    return this._numGuests;
+  }
+  set numGuests(val){
+    if (val < 1) {
+      throw new Error ("Please put at least one guest");
+    }
+    this._numGuests = val;
+  }
+/** validate the date  */
+  get startAt(){
+    return this._startAt;
+  }
+  set startAt(val){
+    if (val !== "Invalid Date") {
+      this._startAt = val;
+    }
+    else {
+      throw new Error ("Please put a valid date");
+    }
+  }
+  /** validate customer Id */
+  get customerId(){
+    return this._customerId;
+  }
+  set customerId(val){
+    // console.log('customer id ..........',this._customerId, '.....val....', val)
+    // if (val !== undefined) {
+      this._customerId = val;
+    // }
+    // else
+    // throw new Error ("You cannot reassign this reservation to someone else");
+  }
 
   /** formatter for startAt */
 
@@ -39,6 +85,20 @@ class Reservation {
     return results.rows.map(row => new Reservation(row));
   }
 
+  static async get(id){
+    const result = await db.query(
+      `SELECT id, 
+      customer_id AS "customerId", 
+      num_guests AS "numGuests", 
+      start_at AS "startAt", 
+      notes AS "notes"
+    FROM reservations 
+    WHERE id = $1`,
+   [id]
+    );
+    return  new Reservation(result.rows[0]);
+  }
+
   async save() {
     if (this.id === undefined) {
       const result = await db.query(
@@ -52,7 +112,7 @@ class Reservation {
       await db.query(
         `UPDATE reservations SET customer_id=$1, start_at=$2, num_guests=$3, notes=$4
              WHERE id=$5`,
-             [this.customerId, this.startAt, this.numGuests, this.notes]
+             [this.customerId, this.startAt, this.numGuests, this.notes, this.id]
       );
     }
   }

@@ -1,0 +1,19 @@
+router.get('/tests', async function(req, res, next) {
+  try{
+    let reservationToChange = Reservation.tryThis();
+    reservationToChange.customer_id = 11;
+    
+  }catch(err){
+    return next(err)
+  }
+})
+
+
+  static async tryThis() {
+    const results = await db.query(
+      `SELECT *
+      FROM reservations 
+      WHERE customer_id = 39`
+    );
+    return new Reservation(results.rows[0]);
+  }

@@ -33,11 +33,12 @@ router.get("/add/", async function(req, res, next) {
 router.post("/add/", async function(req, res, next) {
   try {
     const firstName = req.body.firstName;
+    const middleName = req.body.middleName
     const lastName = req.body.lastName;
     const phone = req.body.phone;
     const notes = req.body.notes;
 
-    const customer = new Customer({ firstName, lastName, phone, notes });
+    const customer = new Customer({ firstName, middleName, lastName, phone, notes });
     await customer.save();
 
     return res.redirect(`/${customer.id}/`);
@@ -45,6 +46,7 @@ router.post("/add/", async function(req, res, next) {
     return next(err);
   }
 });
+
 /** handle a search for customers by name */
 router.get('/search', async function(req, res, next){
   try{
@@ -99,6 +101,7 @@ router.post("/:id/edit/", async function(req, res, next) {
   try {
     const customer = await Customer.get(req.params.id);
     customer.firstName = req.body.firstName;
+    customer.middleName = req.body.middleName;
     customer.lastName = req.body.lastName;
     customer.phone = req.body.phone;
     customer.notes = req.body.notes;
@@ -133,5 +136,47 @@ router.post("/:id/add-reservation/", async function(req, res, next) {
     return next(err);
   }
 });
+
+
+
+/** Show form to edit a reservation */
+router.get("/edit-reservation/:id", async function(req, res, next){
+  try {
+    const reservation = await Reservation.get(req.params.id);
+
+    res.render("reservation_edit_form.html", { reservation });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** Handle edit a reservation */
+router.post("/edit-reservation/:id", async function(req,res,next){
+  try {
+    const reservation = await Reservation.get(req.params.id);
+    console.log(req.body)
+    reservation.startAt = req.body.startAt;
+    reservation.numGuests = req.body.numGuests;
+    reservation.notes = req.body.notes;
+    await reservation.save();
+
+    return res.redirect(`/${reservation.id}/`);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** Show a reservation, given their ID. */
+
+router.get("/reservation/:id", async function(req, res, next) {
+  try {
+    const reservation = await Reservation.get(req.params.id);
+
+    return res.render("reservation_detail.html", { reservation });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 
 module.exports = router;

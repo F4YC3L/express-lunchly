@@ -6,14 +6,47 @@ const Reservation = require("./reservation");
 /** Customer of the restaurant. */
 
 class Customer {
-  constructor({ id, firstName, lastName, phone, notes }) {
+  constructor({ id, firstName, middleName, lastName, phone, notes }) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
+    this.middleName = middleName;
     this.phone = phone;
     this.notes = notes;
   }
+  /** validate firstName */
+  get firstName(){
+    return this._firstName;
+  }
+  set firstName(val){
+    if(!val){
+      throw new Error("please put a First Name")
+    }
+    this._firstName = val;
+  }
 
+   /** validate lastName */
+   get lastName(){
+    return this._lastName;
+  }
+  set lastName(val){
+    if(!val){
+      throw new Error("please put a Last Name")
+    }
+    this._lastName = val;
+  }
+  /** validate notes */
+  get notes(){
+    return this._notes;
+  }
+  set notes(val){
+    if (!val){
+      this._notes = "";
+    }
+    else {
+      this._notes = val;
+    }
+  }
   /** find all customers. */
 
   static async all() {
@@ -53,7 +86,10 @@ class Customer {
     return new Customer(customer);
   }
   /** return full name of customer */
-   fullName(){
+   get fullName(){
+     if(this.middleName) {
+      return `${this.firstName} ${this.middleName} ${this.lastName}`
+     }
      return `${this.firstName} ${this.lastName}`
    }
 
@@ -66,9 +102,8 @@ class Customer {
           last_name AS "lastName",
           phone, 
           notes 
-        FROM customers WHERE (first_name LIKE $1
-          OR last_name LIKE $1
-          OR CONCAT(first_name, ' ', last_name) LIKE $1
+        FROM customers WHERE (
+          CONCAT(first_name, ' ', last_name) LIKE $1
           OR CONCAT(last_name, ' ', first_name) LIKE $1)` ,
       [`%${terms}%`]
     );
